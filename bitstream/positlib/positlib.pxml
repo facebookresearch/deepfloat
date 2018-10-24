@@ -1,0 +1,556 @@
+<!-- Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved. -->
+
+START_PY
+
+include_sv_files([
+    "utils/Functions_pkg.sv",
+    "utils/Comparison_pkg.sv",
+    "utils/DebugFunctions.sv",
+    "utils/EndianByteSwap.sv",
+    "utils/ZeroPadLeft.sv",
+    "utils/ZeroPadRight.sv",
+    "utils/Add.sv",
+    "utils/FieldRead.sv",
+    "utils/FieldWrite.sv",
+    "utils/CountLeadingZeros.sv",
+    "utils/CountLeadingZerosShiftLeft.sv",
+    "utils/KulischDef_pkg.sv",
+    "utils/Kulisch.sv",
+    "utils/KulischConvertFixed.sv",
+    "utils/KulischAccumulatorAdd.sv",
+    "utils/KulischAccumulatorDivide.sv",
+    "utils/PartSelect.sv",
+    "utils/PartSelectReduceOr.sv",
+    "utils/ReduceOrTrailingBits.sv",
+    "utils/ShiftLeft.sv",
+    "utils/ShiftLeftSticky.sv",
+    "utils/ShiftRightArithmetic.sv",
+    "utils/ShiftRightSticky.sv",
+    "utils/Divider.sv",
+    "utils/DividerFixedPoint.sv",
+    "utils/PipelineRegister.sv",
+    "utils/LFSR.sv",
+    "utils/UtilsStubsForVCS.sv",
+    "utils/TrailingStickySelect.sv",
+    "utils/RoundToNearestEven.sv",
+
+    "posit/PositDef_pkg.sv",
+    "posit/PositPacked.sv",
+    "posit/PositUnpacked.sv",
+    "posit/PositDecode.sv",
+    "posit/PositEncode.sv",
+    "posit/PositAdd.sv",
+    "posit/PositMultiply.sv",
+    "posit/PositDivide.sv",
+    "posit/PositRoundHelper.sv",
+    "posit/PositRoundToNearestEven.sv",
+    "posit/PositRoundStochastic.sv",
+    "posit/PositRound.sv",
+    "posit/PositCompare.sv",
+    "posit/PositMax.sv",
+    "posit/PositMin.sv",
+
+    "posit/QuireDef_pkg.sv",
+    "posit/QuireAdd.sv",
+    "posit/QuireToPosit.sv",
+    "posit/PositMultiplyForQuire.sv",
+    "posit/PositQuireConvert.sv",
+
+    "float/FloatDef_pkg.sv",
+    "float/Float.sv",
+
+    "float/FloatProperties.sv",
+    "float/FloatContract.sv",
+    "float/FloatExpand.sv",
+    "float/FloatRoundToNearestEven.sv",
+    "float/KulischToFloat.sv",
+
+    "posit/PositFromFloat.sv",
+    "posit/PositToFloat.sv",
+
+    "posit/operators/PositInstanceParams.sv",
+    "posit/operators/PositConvert.sv",
+    "posit/operators/PositConvertInstance.sv",
+    "posit/operators/PositMath.sv",
+    "posit/operators/PositMathInstance.sv",
+    "posit/operators/PositMathCompare.sv",
+    "posit/operators/PositMathCompareInstance.sv",
+    "posit/operators/PositQuireMath.sv",
+    "posit/operators/PositQuireMathInstance.sv",
+])
+
+include_stub_files([
+    "PositLibRTL.h",
+    "PositConvertRTLStub.cl",
+    "PositMathCompareRTLStub.cl",
+    "PositMathRTLStub.cl",
+    "PositQuireMathRTLStub.cl",
+])
+
+# (8, 0): 8, 32, 32, adiv 22, tdiv 19
+# (8, 1): 8, 32, 64, adiv 40, tdiv 17
+# (9, 1): 16, 32, 64, adiv 46, tdiv 19
+# (11, 1): 16, 32, 64, adiv 58, tdiv 23
+
+set_type_width(8)
+set_product_width(32)
+set_acc_width(64)
+
+set_acc_divide_cycles(40)
+set_type_divide_cycles(17)
+
+END_PY
+
+<RTL_SPEC>
+  <!-- float to posit conversion -->
+
+  <FUNCTION name="positToFloat8_1RTL" module="PositToFloat_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positIn" width="TYPE_WIDTH"/>
+      <INPUT  port="expAdjust" width="8"/>
+      <OUTPUT port="floatOut" width="32"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+      <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="floatToPosit8_1RTL" module="FloatToPosit_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="3"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="floatIn" width="32"/>
+      <INPUT  port="expAdjust" width="8"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- math operators -->
+
+  <FUNCTION name="positAdd8_1RTL" module="PositAdd_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="4"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <INPUT  port="subtract" width="8"/>
+      <INPUT  port="roundStochastic" width="8"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positMul8_1RTL" module="PositMul_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="4"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <INPUT  port="roundStochastic" width="8"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positDiv8_1RTL" module="PositDiv_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <!-- dec + div + round + pack -->
+      <!-- div is 12 cycles for (7, 1)-posit + 3 = 15 -->
+      <!-- div is 16 cycles for (8, 0)-posit + 3 = 19 -->
+      <!-- div is 14 cycles for (8, 1)-posit + 3 = 17 -->
+      <EXPECTED_LATENCY value="TYPE_DIVIDE_CYCLES"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- Compare functions -->
+
+  <FUNCTION name="positComp8_1RTL" module="PositComp_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <INPUT  port="comp" width="8"/>
+      <OUTPUT port="boolOut" width="8"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positMax8_1RTL" module="PositMax_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positMin8_1RTL" module="PositMin_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- Quire math -->
+
+  <FUNCTION name="positQuireConvert8_1RTL" module="PositQuireConvert_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="adjustScale" width="8"/>
+      <OUTPUT port="productOut" width="PRODUCT_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positQuireMultiply8_1RTL" module="PositQuireMultiply_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="positB" width="TYPE_WIDTH"/>
+      <INPUT  port="adjustScale" width="8"/>
+      <OUTPUT port="productOut" width="PRODUCT_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="quirePositAdd8_1RTL" module="QuirePositAdd_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="productIn" width="PRODUCT_WIDTH"/>
+      <INPUT  port="quireIn" width="ACC_WIDTH"/>
+      <OUTPUT port="quireOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="productToQuire8_1RTL" module="ProductToQuire_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="productIn" width="PRODUCT_WIDTH"/>
+      <OUTPUT port="quireOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="positToQuire8_1RTL" module="PositToQuire_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="3"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="positA" width="TYPE_WIDTH"/>
+      <INPUT  port="adjustScale" width="8"/>
+      <OUTPUT port="quireOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="quireAdd8_1RTL" module="QuireAdd_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="quireA" width="ACC_WIDTH"/>
+      <INPUT  port="quireB" width="ACC_WIDTH"/>
+      <OUTPUT port="quireOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="quireToPosit8_1RTL" module="QuireToPosit_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="3"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="quireIn" width="ACC_WIDTH"/>
+      <INPUT  port="adjustMul" width="8"/>
+      <INPUT  port="roundStochastic" width="8"/>
+      <OUTPUT port="positOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="quireDivide8_1RTL" module="QuireDivide_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <!-- div is 34 cycles for (7, 1)-posit -->
+      <!-- div is 22 cycles for (8, 0)-posit -->
+      <!-- div is 40 cycles for (8, 1)-posit -->
+      <EXPECTED_LATENCY value="ACC_DIVIDE_CYCLES"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="quireIn" width="ACC_WIDTH"/>
+      <INPUT  port="div" width="8"/>
+      <OUTPUT port="quireOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="positlib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="positlib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+</RTL_SPEC>

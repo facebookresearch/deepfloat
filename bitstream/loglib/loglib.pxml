@@ -1,0 +1,438 @@
+<!-- Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved. -->
+
+START_PY
+
+include_sv_files([
+    "utils/Functions_pkg.sv",
+    "utils/Comparison_pkg.sv",
+    "utils/DebugFunctions.sv",
+    "utils/EndianByteSwap.sv",
+    "utils/ZeroPadLeft.sv",
+    "utils/ZeroPadRight.sv",
+    "utils/Add.sv",
+    "utils/FieldRead.sv",
+    "utils/FieldWrite.sv",
+    "utils/CountLeadingZeros.sv",
+    "utils/CountLeadingZerosShiftLeft.sv",
+    "utils/KulischDef_pkg.sv",
+    "utils/Kulisch.sv",
+    "utils/KulischConvertFixed.sv",
+    "utils/KulischAccumulatorAdd.sv",
+    "utils/KulischAccumulatorDivide.sv",
+    "utils/PartSelect.sv",
+    "utils/PartSelectReduceOr.sv",
+    "utils/ReduceOrTrailingBits.sv",
+    "utils/ShiftLeft.sv",
+    "utils/ShiftLeftSticky.sv",
+    "utils/ShiftRightArithmetic.sv",
+    "utils/ShiftRightSticky.sv",
+    "utils/Divider.sv",
+    "utils/DividerFixedPoint.sv",
+    "utils/PipelineRegister.sv",
+    "utils/LFSR.sv",
+    "utils/UtilsStubsForVCS.sv",
+    "utils/TrailingStickySelect.sv",
+    "utils/RoundToNearestEven.sv",
+
+    "float/FloatDef_pkg.sv",
+    "float/Float.sv",
+
+    "float/FloatProperties.sv",
+    "float/FloatContract.sv",
+    "float/FloatExpand.sv",
+    "float/FloatRoundToNearestEven.sv",
+    "float/KulischToFloat.sv",
+
+    "posit/PositDef_pkg.sv",
+    "posit/PositPacked.sv",
+    "posit/PositUnpacked.sv",
+    "posit/PositDecode.sv",
+    "posit/PositEncode.sv",
+    "posit/PositRoundHelper.sv",
+    "posit/PositRoundToNearestEven.sv",
+
+    "log/LogDef_pkg.sv",
+    "log/types/FloatSigned.sv",
+    "log/types/LogNumber.sv",
+    "log/types/LogNumberUnpacked.sv",
+    "log/types/LogNumberCompact.sv",
+
+    "log/luts/Pow2LUT_4x5.sv",
+    "log/luts/Pow2LUT_4x8.sv",
+    "log/luts/Pow2LUT_4x11.sv",
+    "log/luts/Pow2LUT.sv",
+    "log/luts/Log2LUT_5x7.sv",
+    "log/luts/Log2LUT_8x7.sv",
+    "log/luts/Log2LUT.sv",
+
+    "log/luts/Pow2Map.sv",
+    "log/luts/Log2Map.sv",
+
+    "log/conversions/FloatSignedToFloat.sv",
+    "log/conversions/FloatSignedToLinearFixed.sv",
+    "log/conversions/FloatSignedToLog.sv",
+    "log/conversions/FloatToFloatSigned.sv",
+    "log/conversions/LinearFixedToFloatSigned.sv",
+    "log/conversions/LogNumberUnpackedToFloatSigned.sv",
+    "log/conversions/LogCompactToLogUnpacked.sv",
+    "log/conversions/LogNumberToLogNumberUnpacked.sv",
+    "log/conversions/LogNumberUnpackedToLogNumber.sv",
+    "log/conversions/LogNumberUnpackedToLogCompact.sv",
+
+    "log/LogNumberUnpackedExtractTrailing.sv",
+    "log/LogToLinearFixed.sv",
+    "log/LogToFloat.sv",
+    "log/FloatToLog.sv",
+    "log/FloatSignedRoundToNearestEven.sv",
+    "log/LinearFixedToLog.sv",
+
+    "log/FloatSignedNarrow.sv",
+    "log/LogCompare.sv",
+    "log/LogMultiply.sv",
+    "log/LogAdd.sv",
+    "log/LogMultiplyAdd.sv",
+
+    "log/operators/LogInstanceParams.sv",
+    "log/operators/LogConvert.sv",
+    "log/operators/LogConvertInstance.sv",
+    "log/operators/LogLinearMath.sv",
+    "log/operators/LogLinearMathInstance.sv",
+    "log/operators/LogMathCompare.sv",
+    "log/operators/LogMathCompareInstance.sv",
+    "log/operators/LogMath.sv",
+    "log/operators/LogMathInstance.sv",
+])
+
+#include_files(["log/luts/log2_8x4.hex",
+#               "log/luts/pow2_4x8.hex"])
+
+include_stub_files([
+    "LogLibRTL.h",
+    "LogConvertRTLStub.cl",
+    "LogMathCompareRTLStub.cl",
+    "LogMathRTLStub.cl",
+    "LogLinearMathRTLStub.cl",
+])
+
+# (8, 1): 8, 64, adiv 40
+
+set_type_width(8)
+set_acc_width(64)
+
+set_acc_divide_cycles(40)
+
+END_PY
+
+<RTL_SPEC>
+  <!-- float to log conversion -->
+
+  <FUNCTION name="logToFloat_RTL" module="LogToFloat_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="vIn" width="TYPE_WIDTH"/>
+      <OUTPUT port="floatOut" width="32"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+      <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="floatToLog_RTL" module="FloatToLog_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="floatIn" width="32"/>
+      <OUTPUT port="vOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- Compare functions -->
+
+  <FUNCTION name="logComp_RTL" module="LogComp_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="a" width="TYPE_WIDTH"/>
+      <INPUT  port="b" width="TYPE_WIDTH"/>
+      <INPUT  port="comp" width="8"/>
+      <OUTPUT port="boolOut" width="8"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- log/linear math -->
+
+  <FUNCTION name="logToLinear_RTL" module="LogToLinear_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="logIn" width="TYPE_WIDTH"/>
+      <OUTPUT port="accOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="linearToLog_RTL" module="LinearToLog_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="accIn" width="ACC_WIDTH"/>
+      <INPUT  port="adjustExp" width="8"/>
+      <OUTPUT port="logOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="linearAdd_RTL" module="LinearAdd_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="1"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="linA" width="ACC_WIDTH"/>
+      <INPUT  port="linB" width="ACC_WIDTH"/>
+      <OUTPUT port="linOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="logMultiplyToLinear_RTL" module="LogMultiplyToLinear_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="2"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="logA" width="TYPE_WIDTH"/>
+      <INPUT  port="logB" width="TYPE_WIDTH"/>
+      <OUTPUT port="accOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="linearDivide_RTL" module="LinearDivide_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <!-- div is 34 cycles for (7, 1)-posit -->
+      <!-- div is 22 cycles for (8, 0)-posit -->
+      <!-- div is 40 cycles for (8, 1)-posit -->
+      <EXPECTED_LATENCY value="ACC_DIVIDE_CYCLES"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="accIn" width="ACC_WIDTH"/>
+      <INPUT  port="div" width="8"/>
+      <OUTPUT port="accOut" width="ACC_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- math operators -->
+
+  <FUNCTION name="logAdd_RTL" module="LogAdd_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="5"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="a" width="TYPE_WIDTH"/>
+      <INPUT  port="b" width="TYPE_WIDTH"/>
+      <INPUT  port="subtract" width="8"/>
+      <OUTPUT port="logOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <FUNCTION name="logMul_RTL" module="LogMul_Instance">
+    <ATTRIBUTES>
+      <IS_STALL_FREE value="yes"/>
+      <IS_FIXED_LATENCY value="yes"/>
+      <EXPECTED_LATENCY value="3"/>
+      <HAS_SIDE_EFFECTS value="no"/>
+      <ALLOW_MERGING value="yes"/>
+    </ATTRIBUTES>
+    <INTERFACE>
+      <AVALON port="clock" type="clock"/>
+      <AVALON port="resetn" type="resetn"/>
+      <AVALON port="ivalid" type="ivalid"/>
+      <AVALON port="iready" type="iready"/>
+      <AVALON port="ovalid" type="ovalid"/>
+      <AVALON port="oready" type="oready"/>
+      <INPUT  port="a" width="TYPE_WIDTH"/>
+      <INPUT  port="b" width="TYPE_WIDTH"/>
+      <OUTPUT port="logOut" width="TYPE_WIDTH"/>
+    </INTERFACE>
+    <C_MODEL>
+      <FILE name="loglib_stub.cl" />
+    </C_MODEL>
+    <REQUIREMENTS>
+    <FILE name="loglib.sv" />
+    </REQUIREMENTS>
+  </FUNCTION>
+
+  <!-- <FUNCTION name="positDiv8_1RTL" module="PositDiv_Instance"> -->
+  <!--   <ATTRIBUTES> -->
+  <!--     <IS_STALL_FREE value="yes"/> -->
+  <!--     <IS_FIXED_LATENCY value="yes"/> -->
+  <!--     <!-\- dec + div + round + pack -\-> -->
+  <!--     <!-\- div is 12 cycles for (7, 1)-posit + 3 = 15 -\-> -->
+  <!--     <!-\- div is 16 cycles for (8, 0)-posit + 3 = 19 -\-> -->
+  <!--     <!-\- div is 14 cycles for (8, 1)-posit + 3 = 17 -\-> -->
+  <!--     <EXPECTED_LATENCY value="17"/> -->
+  <!--     <HAS_SIDE_EFFECTS value="no"/> -->
+  <!--     <ALLOW_MERGING value="yes"/> -->
+  <!--   </ATTRIBUTES> -->
+  <!--   <INTERFACE> -->
+  <!--     <AVALON port="clock" type="clock"/> -->
+  <!--     <AVALON port="resetn" type="resetn"/> -->
+  <!--     <AVALON port="ivalid" type="ivalid"/> -->
+  <!--     <AVALON port="iready" type="iready"/> -->
+  <!--     <AVALON port="ovalid" type="ovalid"/> -->
+  <!--     <AVALON port="oready" type="oready"/> -->
+  <!--     <INPUT  port="positA" width="TYPE_WIDTH"/> -->
+  <!--     <INPUT  port="positB" width="TYPE_WIDTH"/> -->
+  <!--     <OUTPUT port="positOut" width="TYPE_WIDTH"/> -->
+  <!--   </INTERFACE> -->
+  <!--   <C_MODEL> -->
+  <!--     <FILE name="loglib_stub.cl" /> -->
+  <!--   </C_MODEL> -->
+  <!--   <REQUIREMENTS> -->
+  <!--   <FILE name="positlib.sv" /> -->
+  <!--   </REQUIREMENTS> -->
+  <!-- </FUNCTION> -->
+
+</RTL_SPEC>
