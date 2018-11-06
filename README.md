@@ -1,5 +1,3 @@
-# deepfloat
-
 This repository contains the SystemVerilog RTL, C++, HLS (Intel FPGA OpenCL to wrap RTL code) and Python needed to reproduce the numerical results in "Rethinking floating point for deep learning" [1].
 
 There are two types of floating point implemented:
@@ -11,9 +9,9 @@ with partial implementation of IEEE-style (e, s) floating point (likely quite bu
 
 8-bit (8, 1, 5, 5, 7) log is the format described in "Rethinking floating point for deep learning", shown within to be more energy efficient than int8/32 integer multiply-add at 28 nm and an effective drop-in replacement for IEEE 754 binary32 single precision floating point via round to nearest even for CNN inference on ResNet-50 on ImageNet.
 
-[1] Johnson, J. "Rethinking floating point for deep learning." (2018). (arXiv link available soon)
+[1] Johnson, J. "[Rethinking floating point for deep learning.](https://arxiv.org/abs/1811.01721)" (2018). https://arxiv.org/abs/1811.01721
 
-[2] Gustafson, J. and Yonemoto, I. "Beating floating point at its own game: Posit arithmetic." Supercomputing Frontiers and Innovations 4.2 (2017): 71-86.
+[2] Gustafson, J. and Yonemoto, I. "[Beating floating point at its own game: Posit arithmetic.](https://dl.acm.org/citation.cfm?id=3148220)" Supercomputing Frontiers and Innovations 4.2 (2017): 71-86.
 
 # Requirements
 
