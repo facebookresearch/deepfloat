@@ -1,4 +1,4 @@
-This repository contains the SystemVerilog RTL, C++, HLS (Intel FPGA OpenCL to wrap RTL code) and Python needed to reproduce the numerical results in "Rethinking floating point for deep learning" [1].
+This repository contains the SystemVerilog RTL, C++, HLS (Intel FPGA OpenCL to wrap RTL code) and Python needed to reproduce the numerical results in "[Rethinking floating point for deep learning](https://arxiv.org/abs/1811.01721)" [1].
 
 There are two types of floating point implemented:
 
