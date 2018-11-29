@@ -105,6 +105,11 @@ log/luts/Log2LUT_8x5.sv
 log/luts/Log2LUT_8x7.sv
 log/luts/Log2LUT_8x8.sv
 log/luts/Log2LUT_9x8.sv
+log/luts/Log2LUT_11x10.sv
+log/luts/Log2DeltaLUT_5x7.sv
+log/luts/Log2DeltaLUT_8x7.sv
+log/luts/Log2DeltaLUT_11x10.sv
+log/luts/Log2DeltaLUT.sv
 log/luts/Log2LUT.sv
 
 log/luts/Pow2Map.sv

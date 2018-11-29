@@ -90,6 +90,7 @@ log/luts/Pow2LUT_4x5.sv
 log/luts/Pow2LUT_4x8.sv
 log/luts/Pow2LUT_4x11.sv
 log/luts/Pow2LUT_5x8.sv
+log/luts/Pow2LUT_7x8.sv
 log/luts/Pow2LUT_8x9.sv
 log/luts/Pow2LUT_10x11.sv
 log/luts/Pow2LUT.sv

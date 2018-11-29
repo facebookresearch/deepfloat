@@ -125,6 +125,11 @@ module FloatToLog_Impl #(parameter WIDTH=8,
         .stickyBit(logTrailingBitsReg[0]),
         .out(logCompact));
 
+  always_comb begin
+    oready = 1'b1;
+    ovalid = 1'b1;
+  end
+
   always_ff @(posedge clock) begin
     if (!resetn) begin
       // 1

@@ -59,18 +59,10 @@ module FloatSignedToLog #(// linear parameters
     logSignedExpRounded = in.data.exp + logExpRound;
 
     // FIXME: if EXP_IN == M, this isn't performed correctly
-    overflow = logSignedExpRounded >= signed'(MAX_EXP_BITS'(2 ** (M - 1)));
+    overflow = logSignedExpRounded >= signed'(MAX_EXP_BITS'(2 ** (M - 1) - 1));
     underflow = logSignedExpRounded < -signed'(MAX_EXP_BITS'(2 ** (M - 1)));
 
     finalExp = M'(logSignedExpRounded);
-
-    // $display("expbits %p funround %b fround %b expSigned %p ovf %b unf %b",
-    //          MAX_EXP_BITS,
-    //          fractionUnrounded,
-    //          fractionRounded,
-    //          expSigned,
-    //          overflow,
-    //          underflow);
 
     if (in.data.isInf || (!SATURATE_MAX && overflow)) begin
       out.data = out.inf();
