@@ -56,10 +56,6 @@ module FloatToFloatSignedDenormalTest();
       #1;
 
       assert(isDenormal);
-      $display("input %s output %s",
-               floatIn.print(floatIn.data),
-               floatOut.print(floatOut.data));
-
       assert(floatIn.toReal(floatIn.data) == $bitstoshortreal(floatOut.data));
     end
 
