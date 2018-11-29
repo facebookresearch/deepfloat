@@ -137,7 +137,9 @@ log/FloatSignedNarrow.sv
 log/LogCompare.sv
 log/LogMultiply.sv
 log/LogAdd.sv
+log/LogAddWithFloat.sv
 log/LogMultiplyAdd.sv
+log/LogMultiplyAddWithFloat.sv
 
 log/operators/LogInstanceParams.sv
 log/operators/LogConvert.sv
@@ -154,6 +156,7 @@ paper_syn/PaperIntegerPETop.sv
 paper_syn/PaperLogPE.sv
 paper_syn/PaperLogPETop.sv
 paper_syn/PaperLogFlatPETop.sv
+paper_syn/PaperLogFlatIntoFloatPETop.sv
 paper_syn/PaperPositPE.sv
 paper_syn/PaperPositPETop.sv
 paper_syn/PaperFloatPE.sv
